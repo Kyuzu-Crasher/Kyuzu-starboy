@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanatic AI - Chat & Kreasi</title>
+    
+
+<script src="https://cdn.tailwindcss.com"></script>
+    
+
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Orbitron:wght@400..900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000; /* Pure black background */
+            color: #E0E0E0; /* Light grey/white text */
+            overflow: hidden; /* Hide scrollbar for initial loading screen */
+        }
+
+        /* --- Custom Neon Effect for Text (Dimmer Red) --- */
+        .neon-text-red {
+            font-family: 'Orbitron', sans-serif; /* A sci-fi / futuristic font */
+            color: #ff4d4d; /* Bright red base */
+            text-shadow:
+                0 0 5px #ff4d4d,
+                0 0 10px #ff4d4d,
+                0 0 15px #800000, /* Deep red for main glow */
+                0 0 25px #800000,
+                0 0 35px #660000; /* Darker red for halo - Dimmmed compared to previous */
+        }
+
+        /* --- Custom Neon Effect for Subtle Text (Used on Loading) --- */
+        .neon-text-subtle {
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            text-shadow:
+                0 0 5px rgba(255, 255, 255, 0.7), /* Softer white glow */
+                0 0 10px rgba(100, 200, 255, 0.5), /* Subtle blue hint */
+                0 0 15px rgba(100, 200, 255, 0.3);
+        }
+
+        /* --- Scrollbar Styling for Chat Window --- */
+        #chat-window::-webkit-scrollbar { width: 8px; }
+        #chat-window::-webkit-scrollbar-track { background: rgba(31, 31, 31, 0.5); border-radius: 4px; }
+        #chat-window::-webkit-scrollbar-thumb { background: rgba(51, 51, 51, 0.8); border-radius: 4px; }
+        #chat-window::-webkit-scrollbar-thumb:hover { background: rgba(85, 85, 85, 0.8); }
+
+        /* --- Message Bubble Styling --- */
+        .user-message {
+            background-color: #7f1d1d; /* Dark Red/Rusted Iron for user (red-900) */
+            color: white;
+            border-radius: 1rem 1rem 0.5rem 1rem;
+        }
+        .model-message {
+            background-color: rgba(38, 38, 38, 0.8); /* Darker grey for model, slightly transparent */
+            color: #E0E0E0;
+            border-radius: 1rem 1rem 1rem 0.5rem;
+        }
+
+        /* --- Modal Styling --- */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    
+<!-- LOADING SCREEN (15s) -->
+<div id="loading-screen" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[1001]">
+        <!-- Border is now Rusted Red -->
+        <div class="relative w-full max-w-sm p-4 border-2 border-red-900 rounded-3xl animate-pulse">
+            <img src="https://files.catbox.moe/je7otf.jpg" alt="Kyuzu AI Logo" class="w-full h-auto rounded-xl shadow-lg">
+            <div class="absolute inset-0 flex items-center justify-center">
+                
+</div>
+        </div>
+        <!-- Text is subtle white neon (as before for loading) -->
+        <p class="neon-text-subtle text-4xl mt-8 tracking-wider">VANATIC AI 1.0</p>
+    </div>
+
+    
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="modal">
+        <!-- Card uses Rusted Red Border -->
+        <div class="w-full max-w-lg mx-auto p-6 md:p-8 bg-black bg-opacity-70 rounded-2xl shadow-neon-blue border border-red-900 backdrop-blur-sm">
+            <img src="https://files.catbox.moe/6526c7.jpg" alt="Login Banner" class="w-full h-auto rounded-xl mb-6 shadow-lg">
+            <!-- Neon text is now DIMMER RED -->
+            <h1 class="text-5xl font-extrabold text-center neon-text-red mb-8">Vanatic AI 1.0</h1>
+
+            <div class="space-y-4">
+                <div>
+                    <label for="username-input" class="block text-gray-300 text-sm font-bold mb-2">Username</label>
+                    <input type="text" id="username-input" class="w-full p-4 bg-gray-900 bg-opacity-50 border border-red-900 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-red-700 focus:border-red-700 transition-all" placeholder="Your Name">
+                </div>
+                <div>
+                    <label for="api-key-input" class="block text-gray-300 text-sm font-bold mb-2">Password</label>
+                    <!-- API Key Input focus rings/borders changed to Rusted Red variants -->
+                    <input type="password" id="api-key-input" class="w-full p-4 bg-gray-900 bg-opacity-50 border border-red-900 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-red-700 focus:border-red-700 transition-all" placeholder="Password">
+                    <p class="text-xs text-gray-400 mt-2">Buyy Access? @KyuzuStarboyy</p>
+                </div>
+                <!-- Login Button changed to Rusted Red -->
+                <button onclick="handleLogin()" class="w-full flex items-center justify-center p-4 rounded-xl bg-red-900 hover:bg-red-800 text-white font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2v5a2 2 0 01-2 2h-5a2 2 0 01-2-2V9a2 2 0 012-2h5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 11V3m0 0l3 3m-3-3L9 6" />
+                    </svg>
+                    Masuk
+                </button>
+            </div>
+            <p id="login-status" class="text-center text-sm mt-4 text-red-400"></p>
+        </div>
+    </div>
+
+
+    
+<!-- MAIN APP SCREEN -->
+<div id="app" class="flex flex-col flex-grow w-full max-w-4xl mx-auto p-4 md:p-6 hidden">
+        
+        <!-- HEADER (Banner) -->
+        <header class="text-center mb-6">
+            <!-- Banner border changed to Rusted Red -->
+            <img src="https://files.catbox.moe/hsx3ti.jpg" alt="Kyuzu AI Banner" class="w-full h-auto rounded-xl mb-4 shadow-lg border-2 border-red-900">
+            <h1 class="text-4xl font-extrabold text-white tracking-tight">
+                <!-- Text color changed to Rusted Red -->
+                <span class="text-red-700">Vatanic Ai 1.0</span> 
+ <span class="text-sm font-light block mt-1">Welcome Back To Vanatic Ai
+ By : @KyuzuStarboyy</span>
+            </h1>
+        </header>
+
+        
+        <!-- LOADING INDICATOR -->
+        <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="flex flex-col items-center">
+                <!-- Spinner color changed to Rusted Red -->
+                <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-red-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-2 text-white">Memproses Permintaan...</p>
+            </div>
+        </div>
+        
+        <!-- TAB NAVIGATION -->
+        <!-- Gradient and border changed to Rusted Red/Dark Zinc -->
+        <div class="flex mb-4 p-1 bg-gradient-to-r from-red-900 to-zinc-900 rounded-lg shadow-md border border-red-900">
+            <!-- Active tab color changed to Rusted Red -->
+            <button id="tab-chat" class="flex-1 py-2 rounded-lg text-sm font-medium transition-colors bg-red-800 text-white shadow-md" onclick="switchMode('chat')">
+                Vanatic Fun ッ
+            </button>
+            <button id="tab-generate" class="flex-1 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white transition-colors" onclick="switchMode('generate')">
+                Buat Gambar (Image Gen)
+            </button>
+        </div>
+
+        
+        <!-- CHAT MODE -->
+        <div id="chat-mode" class="flex flex-col flex-grow">
+            
+            <!-- CHAT WINDOW (Rusted Red Border) -->
+            <div id="chat-window" class="flex-grow overflow-y-auto p-4 space-y-4 bg-black bg-opacity-40 rounded-xl shadow-inner border border-red-900 mb-4 backdrop-blur-sm">
+                <!-- Username welcome text color changed -->
+                <div class="flex justify-center text-sm text-gray-500 pt-10">
+                   👋 Welcome, <span id="welcome-username" class="font-bold text-red-400 ml-1">Pengguna</span>! Di Vatanic Chat Ai.
+                </div>
+                
+</div>
+            
+            <!-- INPUT AREA -->
+            <div class="bg-black bg-opacity-60 p-4 rounded-xl shadow-2xl border border-red-900 backdrop-blur-sm">
+                <!-- User ID text color changed -->
+                <p class="text-xs text-gray-500 mb-2">ID Pengguna Anda: <span id="user-id-display" class="font-mono text-red-400">...</span></p>
+                <div class="flex items-end space-x-2">
+                    <!-- File Upload Button (Changed to Zinc/Grey for metallic look) -->
+                    <label for="file-upload" class="cursor-pointer p-3 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </label>
+                    <input type="file" id="file-upload" accept="image/*" class="hidden" onchange="previewFile(event)">
+                    
+                    <!-- Textarea border/focus changed to Rusted Red variants -->
+                    <textarea id="chat-input" rows="1" class="flex-grow p-3 bg-gray-900 bg-opacity-50 border border-red-900 rounded-xl resize-none text-white focus:ring-2 focus:ring-red-700 focus:border-red-700 transition-all placeholder-gray-500" placeholder="KyuzuGanteng" oninput="autoResize(this)"></textarea>
+                    
+                    <!-- Send Button changed to Rusted Red -->
+                    <button id="send-button" onclick="handleChatSubmit()" class="p-3 rounded-xl bg-red-900 hover:bg-red-800 text-white flex-shrink-0 shadow-lg transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transform rotate-45 -mt-1 -mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div id="image-preview-container" class="mt-3 p-2 bg-gray-800 bg-opacity-50 rounded-lg hidden border border-gray-700">
+                    <div class="flex justify-between items-center">
+                        <p class="text-sm font-medium text-white">Pratinjau Gambar:</p>
+                        <button onclick="removeFile()" class="text-red-400 hover:text-red-500 text-sm">Hapus</button>
+                    </div>
+                    <img id="image-preview" class="max-h-24 w-auto mt-2 rounded-lg shadow-md" alt="Preview Gambar">
+                </div>
+            </div>
+        </div>
+
+        
+        <!-- GENERATE IMAGE MODE -->
+        <div id="generate-mode" class="flex flex-col flex-grow hidden">
+            
+            <div id="image-output-container" class="flex-grow flex items-center justify-center p-4 bg-black bg-opacity-40 rounded-xl shadow-inner border border-red-900 mb-4 backdrop-blur-sm">
+                <img id="generated-image" class="max-w-full max-h-full rounded-lg shadow-xl hidden" alt="Gambar Dihasilkan">
+                <p id="image-placeholder" class="text-center text-gray-500">
+                    Masukkan prompt di bawah dan klik "Buat Gambar".
+                </p>
+            </div>
+            
+            <div class="bg-black bg-opacity-60 p-4 rounded-xl shadow-2xl border border-red-900 backdrop-blur-sm">
+                <div class="flex items-center space-x-2">
+                    <!-- Textarea border/focus changed to Rusted Red variants -->
+                    <textarea id="image-prompt-input" rows="2" class="flex-grow p-3 bg-gray-900 bg-opacity-50 border border-red-900 rounded-xl resize-none text-white focus:ring-2 focus:ring-red-700 focus:border-red-700 transition-all placeholder-gray-500" placeholder="Deskripsi gambar yang ingin Anda buat... (Contoh: Kucing futuristik di luar angkasa dengan gaya seni digital)"></textarea>
+                    
+                    <!-- Generate Button changed to Rusted Red -->
+                    <button id="generate-image-button" onclick="generateImage()" class="p-3 rounded-xl bg-red-800 hover:bg-red-700 text-white flex-shrink-0 shadow-lg transition-colors h-14 w-14 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.6 4a2 2 0 112.828 2.828l-7.9 7.9M7.4 17.6a2 2 0 11-2.828-2.828l7.9-7.9m0 0l-3 3m3-3l3 3" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    
+<!-- JAVASCRIPT LOGIC (Unchanged functionality) -->
+<script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, addDoc, onSnapshot, collection, query, orderBy, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for App State
+        window.app = null;
+        window.db = null;
+        window.auth = null;
+        window.userId = null;
+        window.username = 'Pengguna'; // Default username
+        window.isAuthReady = false;
+        window.selectedFile = null;
+        window.apiKey = ''; // Now loaded from localStorage/input
+
+        const API_KEY_STORAGE_KEY = 'vanatic_gemini_api_key';
+        const USERNAME_STORAGE_KEY = 'vanatic_username';
+        const CHAT_COLLECTION = 'vanatic_messages';
+        const MODEL_CHAT_NAME = 'gemini-2.5-flash-preview-09-2025';
+        const MODEL_IMAGE_NAME = 'imagen-3.0-generate-002';
+
+        // Helper function for exponential backoff
+        async function fetchWithRetry(url, options, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        if (response.status === 401 || response.status === 403) {
+                            throw new Error("401/403 Unauthorized. Mohon periksa kembali Kunci API Gemini Anda.");
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response;
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} failed.`, error);
+                    if (i === maxRetries - 1) throw error; 
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
+        // --- API Key & Username Management ---
+
+        window.handleLogin = () => {
+            const apiKeyInput = document.getElementById('api-key-input');
+            const usernameInput = document.getElementById('username-input');
+            const loginStatus = document.getElementById('login-status');
+
+            const inputApiKey = apiKeyInput.value.trim();
+            const inputUsername = usernameInput.value.trim();
+
+            if (!inputApiKey) {
+                loginStatus.textContent = "⚠️ Kunci API Gemini wajib diisi!";
+                loginStatus.classList.add('text-red-400');
+                return;
+            }
+
+            window.apiKey = inputApiKey;
+            localStorage.setItem(API_KEY_STORAGE_KEY, inputApiKey);
+            
+            if (inputUsername) {
+                window.username = inputUsername;
+                localStorage.setItem(USERNAME_STORAGE_KEY, inputUsername);
+            } else {
+                window.username = 'Pengguna';
+                localStorage.removeItem(USERNAME_STORAGE_KEY);
+            }
+            
+            loginStatus.textContent = ""; // Clear any previous error
+
+            // Proceed to main app
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app').classList.remove('hidden');
+            document.body.style.overflow = 'auto'; // Re-enable scroll
+            updateWelcomeUsername(); // Update username in chat header
+            initFirebase(); // Initialize Firebase after successful login
+        };
+
+        function loadCredentials() {
+            const storedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+            const storedUsername = localStorage.getItem(USERNAME_STORAGE_KEY);
+
+            if (storedKey) {
+                window.apiKey = storedKey;
+                document.getElementById('api-key-input').value = storedKey;
+            }
+            if (storedUsername) {
+                window.username = storedUsername;
+                document.getElementById('username-input').value = storedUsername;
+            }
+            updateWelcomeUsername();
+        }
+
+        function updateWelcomeUsername() {
+            const welcomeSpan = document.getElementById('welcome-username');
+            if (welcomeSpan) {
+                welcomeSpan.textContent = window.username;
+            }
+        }
+        
+        // --- Firebase Initialization and Auth ---
+        window.initFirebase = async () => {
+            // Placeholder for Firebase config. If you want chat history, 
+            // replace `null` with your actual Firebase config object:
+            // const firebaseConfig = {
+            //   apiKey: "YOUR_API_KEY",
+            //   authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            //   projectId: "YOUR_PROJECT_ID",
+            //   storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            //   messagingSenderId: "YOUR_SENDER_ID",
+            //   appId: "YOUR_APP_ID"
+            // };
+            const firebaseConfig = null; 
+
+            if (!firebaseConfig) {
+                console.warn("Firebase config is missing. Chat history and user auth will be minimal (temporary ID).");
+                document.getElementById('user-id-display').textContent = 'Sejarah Non-Aktif';
+                window.userId = crypto.randomUUID(); // Generate a temporary ID
+                window.isAuthReady = true;
+                return;
+            }
+
+            try {
+                setLogLevel('debug');
+                
+                window.app = initializeApp(firebaseConfig);
+                window.db = getFirestore(window.app);
+                window.auth = getAuth(window.app);
+                
+                await signInAnonymously(window.auth);
+                
+                onAuthStateChanged(window.auth, (user) => {
+                    if (user) {
+                        window.userId = user.uid;
+                        document.getElementById('user-id-display').textContent = window.userId;
+                        window.isAuthReady = true;
+                        console.log("User authenticated. Starting chat listener.");
+                        setupChatListener('vanatic-ai-vercel', window.userId); // Use a fixed app ID for public collection
+                    } else {
+                        window.userId = crypto.randomUUID();
+                        document.getElementById('user-id-display').textContent = window.userId + ' (Anon)';
+                        window.isAuthReady = true;
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                document.getElementById('user-id-display').textContent = 'ERROR (Firebase)';
+            }
+        };
+        
+        // --- Firestore Listener Setup (Only runs if Firebase is configured) ---
+        function setupChatListener(appId, userId) {
+            if (!window.db) return;
+
+            const chatRef = collection(
+                window.db, 
+                `artifacts/${appId}/public/data/${CHAT_COLLECTION}` 
+            );
+            const q = query(chatRef, orderBy('timestamp'));
+
+            onSnapshot(q, (snapshot) => {
+                let chatHistory = [];
+                snapshot.forEach(doc => {
+                    chatHistory.push({ id: doc.id, ...doc.data() });
+                });
+                renderChat(chatHistory);
+            }, (error) => {
+                console.error("Error listening to chat messages: ", error);
+            });
+        }
+
+        // --- UI Rendering ---
+
+        function formatText(text) {
+            let html = text.replace(/\n/g, '<br>');
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // **Bold**
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>'); // *Italic*
+            html = html.replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-700 text-white p-2 rounded text-sm overflow-x-auto my-2"><code>$1</code></pre>'); // Code blocks
+            html = html.replace(/`(.*?)`/g, '<code class="bg-gray-700 text-white px-1 py-0.5 rounded text-sm">$1</code>'); // Inline code
+            html = html.replace(/^- (.*?)<br>/g, '<ul class="list-disc list-inside ml-4"><li>$1</li></ul><br>'); // List items (simple)
+            return html;
+        }
+
+        function renderChat(messages) {
+            const chatWindow = document.getElementById('chat-window');
+            if (messages.length === 0) {
+                chatWindow.innerHTML = `<div class="flex justify-center text-sm text-gray-500 pt-10">Selamat datang, <span class="font-bold text-red-400 ml-1">${window.username}</span>! Mulai obrolan.</div>`;
+                return;
+            }
+
+            chatWindow.innerHTML = ''; 
+            
+            messages.forEach(msg => {
+                const isUser = msg.role === 'user';
+                const containerClass = isUser ? 'justify-end' : 'justify-start';
+                const bubbleClass = isUser ? 'user-message' : 'model-message';
+                const messageHtml = formatText(msg.text || '');
+
+                const msgElement = document.createElement('div');
+                msgElement.className = `flex ${containerClass}`;
+                
+                const timeStr = msg.timestamp ? new Date(msg.timestamp.toDate()).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : 'Sekarang';
+
+                msgElement.innerHTML = `
+                    <div class="max-w-xs md:max-w-md lg:max-w-xl">
+                        <div class="py-2 px-4 rounded-xl shadow-md ${bubbleClass}">
+                            ${messageHtml}
+                        </div>
+                        ${msg.image ? 
+                            `<div class="mt-2 rounded-lg overflow-hidden shadow-lg border-2 border-gray-600">
+                                <img src="data:${msg.mimeType};base64,${msg.image}" alt="Uploaded Image" class="w-full h-auto object-cover max-h-48">
+                            </div>` : ''
+                        }
+                        <p class="text-[10px] text-gray-500 mt-1 ${isUser ? 'text-right' : 'text-left'}">${timeStr}</p>
+                    </div>
+                `;
+                chatWindow.appendChild(msgElement);
+            });
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function renderTemporaryMessage(msg) {
+            const chatWindow = document.getElementById('chat-window');
+            if (chatWindow.children.length === 1 && chatWindow.children[0].textContent.includes('Selamat datang')) {
+                 chatWindow.innerHTML = '';
+            }
+            
+            const isUser = msg.role === 'user';
+            const containerClass = isUser ? 'justify-end' : 'justify-start';
+            const bubbleClass = isUser ? 'user-message' : 'model-message';
+            const messageHtml = formatText(msg.text || '');
+
+            const msgElement = document.createElement('div');
+            msgElement.className = `flex ${containerClass}`;
+            
+            const timeStr = new Date(msg.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+            msgElement.innerHTML = `
+                <div class="max-w-xs md:max-w-md lg:max-w-xl">
+                    <div class="py-2 px-4 rounded-xl shadow-md ${bubbleClass}">
+                        ${messageHtml}
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-1 ${isUser ? 'text-right' : 'text-left'}">${timeStr} (Temp)</p>
+                </div>
+            `;
+            chatWindow.appendChild(msgElement);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+
+        // --- Input Handling ---
+
+        window.autoResize = (textarea) => {
+            textarea.style.height = 'auto';
+            textarea.style.height = (textarea.scrollHeight) + 'px';
+        };
+
+        window.previewFile = (event) => {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                window.selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewImg = document.getElementById('image-preview');
+                    const previewContainer = document.getElementById('image-preview-container');
+                    previewImg.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
+                    document.getElementById('chat-input').placeholder = "Tulis pesan Anda untuk dianalisis bersama gambar...";
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert("Hanya gambar yang dapat diunggah untuk analisis multimodal.");
+                removeFile();
+            }
+        };
+
+        window.removeFile = () => {
+            window.selectedFile = null;
+            document.getElementById('file-upload').value = ''; 
+            document.getElementById('image-preview-container').classList.add('hidden');
+            document.getElementById('chat-input').placeholder = "Tulis pesan atau berikan prompt untuk gambar...";
+        };
+
+        window.handleChatSubmit = () => {
+            if (!window.apiKey) {
+                 alert("⚠️ Peringatan: Mohon masukkan Kunci API Gemini Anda di halaman login untuk mengaktifkan AI.");
+                 return;
+            }
+
+            const input = document.getElementById('chat-input');
+            const prompt = input.value.trim();
+            
+            if (!prompt && !window.selectedFile) {
+                console.error("Pesan atau gambar tidak boleh kosong.");
+                return;
+            }
+
+            // Clear input and file selection immediately
+            input.value = '';
+            input.style.height = 'auto';
+            const fileToProcess = window.selectedFile;
+            removeFile(); 
+            
+            document.getElementById('loading').classList.remove('hidden');
+
+            let imageBase64 = null;
+            let imageMimeType = null;
+
+            const processChat = (base64, mimeType) => {
+                imageBase64 = base64;
+                imageMimeType = mimeType;
+                
+                if (window.db) {
+                    saveMessageToFirestore({
+                        role: 'user',
+                        text: prompt,
+                        image: imageBase64,
+                        mimeType: imageMimeType,
+                        timestamp: serverTimestamp()
+                    });
+                } else {
+                    renderTemporaryMessage({ role: 'user', text: prompt, image: imageBase64, mimeType: imageMimeType, timestamp: new Date() });
+                }
+                
+                callGeminiChat(prompt, imageBase64, imageMimeType);
+            };
+
+            if (fileToProcess) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64String = e.target.result.split(',')[1];
+                    processChat(base64String, fileToProcess.type);
+                };
+                reader.readAsDataURL(fileToProcess);
+            } else {
+                processChat(null, null);
+            }
+        };
+
+        // --- API Calls ---
+
+        async function callGeminiChat(prompt, imageBase64, mimeType) {
+            const userParts = [{ text: prompt }];
+            if (imageBase64) {
+                userParts.push({
+                    inlineData: {
+                        mimeType: mimeType,
+                        data: imageBase64
+                    }
+                });
+            }
+
+            const payload = {
+                contents: [{ role: "user", parts: userParts }],
+                systemInstruction: {
+                    parts: [{ text: `Anda adalah Vanatic AI 1.0, sebuah asisten serbaguna yang ramah dan keren, bertema gelap dan futuristik. Nama pengguna adalah ${window.username}. Jawab dalam Bahasa Indonesia. Berikan respons yang membantu, informatif, dan ringkas. Gunakan format markdown standar.` }]
+                }
+            };
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_CHAT_NAME}:generateContent?key=${window.apiKey}`;
+
+            try {
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, saya tidak dapat memproses permintaan ini. Mungkin ada masalah dengan Kunci API atau prompt.";
+
+                if (window.db) {
+                    saveMessageToFirestore({
+                        role: 'model',
+                        text: text,
+                        timestamp: serverTimestamp()
+                    });
+                } else {
+                    renderTemporaryMessage({ role: 'model', text: text, timestamp: new Date() });
+                }
+
+            } catch (error) {
+                console.error("Error calling Gemini Chat API:", error);
+                
+                const errorMessage = (error.message.includes('401/403')) 
+                    ? "⚠️ **Kunci API Tidak Valid/Unauthorized.** Mohon periksa kembali Kunci API Gemini Anda."
+                    : `Terjadi kesalahan saat menghubungi AI: ${error.message}`;
+
+                if (window.db) {
+                    saveMessageToFirestore({
+                        role: 'model',
+                        text: errorMessage,
+                        timestamp: serverTimestamp()
+                    });
+                } else {
+                    renderTemporaryMessage({ role: 'model', text: errorMessage, timestamp: new Date() });
+                }
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        window.generateImage = async () => {
+             if (!window.apiKey) {
+                 alert("⚠️ Peringatan: Mohon masukkan Kunci API Gemini Anda di halaman login untuk mengaktifkan AI.");
+                 return;
+            }
+            
+            const prompt = document.getElementById('image-prompt-input').value.trim();
+            if (!prompt) {
+                document.getElementById('image-placeholder').textContent = 'Mohon masukkan deskripsi gambar terlebih dahulu.';
+                return;
+            }
+
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('image-placeholder').textContent = 'AI sedang menciptakan karya seni Anda...';
+            document.getElementById('generated-image').classList.add('hidden');
+
+            const payload = { 
+                instances: [{ prompt: prompt }], 
+                parameters: { "sampleCount": 1 } 
+            };
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_IMAGE_NAME}:predict?key=${window.apiKey}`;
+
+            try {
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                const base64Data = result.predictions?.[0]?.bytesBase64Encoded;
+
+                if (base64Data) {
+                    const imageUrl = `data:image/png;base64,${base64Data}`;
+                    document.getElementById('generated-image').src = imageUrl;
+                    document.getElementById('generated-image').classList.remove('hidden');
+                    document.getElementById('image-placeholder').textContent = 'Gambar berhasil dibuat!';
+                } else {
+                    document.getElementById('image-placeholder').textContent = 'Gagal menghasilkan gambar. Coba prompt lain.';
+                    console.error("Image generation failed:", result);
+                }
+            } catch (error) {
+                 const errorMessage = (error.message.includes('401/403')) 
+                    ? "⚠️ Kunci API Tidak Valid/Unauthorized. Mohon periksa kembali Kunci API Gemini Anda."
+                    : `Terjadi kesalahan saat menghasilkan gambar: ${error.message}`;
+
+                document.getElementById('image-placeholder').textContent = errorMessage;
+                console.error("Error calling Imagen API:", error);
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        };
+
+        // --- Firestore Utilities ---
+
+        async function saveMessageToFirestore(message) {
+            if (!window.db || !window.isAuthReady) return;
+
+            const appId = 'vanatic-ai-vercel'; 
+            const collectionPath = `artifacts/${appId}/public/data/${CHAT_COLLECTION}`;
+
+            try {
+                await addDoc(collection(window.db, collectionPath), message);
+                console.log("Message saved to Firestore.");
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+        }
+
+        // --- Mode Switching ---
+
+        window.switchMode = (mode) => {
+            const chatTab = document.getElementById('tab-chat');
+            const generateTab = document.getElementById('tab-generate');
+            const chatMode = document.getElementById('chat-mode');
+            const generateMode = document.getElementById('generate-mode');
+
+            // Reset tab styles
+            chatTab.classList.remove('bg-red-800', 'text-white', 'shadow-md');
+            chatTab.classList.add('text-gray-300', 'hover:text-white');
+            generateTab.classList.remove('bg-red-800', 'text-white', 'shadow-md');
+            generateTab.classList.add('text-gray-300', 'hover:text-white');
+
+            if (mode === 'chat') {
+                chatTab.classList.add('bg-red-800', 'text-white', 'shadow-md');
+                chatMode.classList.remove('hidden');
+                generateMode.classList.add('hidden');
+            } else {
+                generateTab.classList.add('bg-red-800', 'text-white', 'shadow-md');
+                generateMode.classList.remove('hidden');
+                chatMode.classList.add('hidden');
+            }
+        };
+        
+        // --- Initialization on Load ---
+        window.onload = () => {
+            // Show loading screen initially
+            document.getElementById('loading-screen').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling during loading
+
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('login-screen').style.display = 'flex'; // Show login screen after loading
+                document.body.style.overflow = 'auto'; // Re-enable scroll for login if needed
+                loadCredentials(); // Load saved API key and username
+            }, 15000); // 15 seconds loading screen
+        };
+        
+  </script>
+</body>
+</html>
